@@ -85,6 +85,7 @@ export const useResumeAnalysis = () => {
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string>('');
   const [lastSubmission, setLastSubmission] = useState<number>(0);
+  const [analyzedResume, setAnalyzedResume] = useState<File | null>(null);
 
   const analyzeResume = async (resumeText: string, jobDescription: string): Promise<string> => {
     const formData = new FormData();
@@ -122,6 +123,8 @@ export const useResumeAnalysis = () => {
     setError,
     lastSubmission,
     setLastSubmission,
+    analyzedResume,
+    setAnalyzedResume,
     analyzeResume,
   };
 };
@@ -223,6 +226,135 @@ interface AnalysisResultsProps {
 export const AnalysisResults: FC<AnalysisResultsProps> = ({ result, loading }) => {
   if (!result && !loading) return null;
 
+  // Function to format the analysis result
+  const formatAnalysisResult = (text: string) => {
+    // Split the text into sections
+    const sections = text.split(/(?=## )/);
+    
+    return sections.map((section, index) => {
+      if (section.trim() === '') return null;
+      
+      // Check if it's a header section
+      if (section.startsWith('## ')) {
+        const lines = section.split('\n');
+        // Remove any leading emoji/icon and extra spaces from the header
+        const header = lines[0].replace('## ', '').replace(/^[^a-zA-Z0-9]+/, '').trim();
+        const content = lines.slice(1).join('\n').trim();
+        
+        // Determine the icon and color based on the header
+        let icon = '📊';
+        let color = 'text-blue-600 dark:text-blue-400';
+        
+        if (header.includes('ATS COMPATIBILITY') || header.includes('SCORE')) {
+          icon = '🎯';
+          color = 'text-emerald-600 dark:text-emerald-400';
+        } else if (header.includes('MATCHING') || header.includes('✅')) {
+          icon = '✅';
+          color = 'text-green-600 dark:text-green-400';
+        } else if (header.includes('MISSING') || header.includes('❌')) {
+          icon = '❌';
+          color = 'text-red-600 dark:text-red-400';
+        } else if (header.includes('RECOMMENDATIONS') || header.includes('💡')) {
+          icon = '💡';
+          color = 'text-purple-600 dark:text-purple-400';
+        } else if (header.includes('ASSESSMENT') || header.includes('📊')) {
+          icon = '📊';
+          color = 'text-blue-600 dark:text-blue-400';
+        }
+        
+        return (
+          <div key={index} className="mb-8 last:mb-0">
+            <div className={`flex items-center gap-3 mb-4 ${color}`}>
+              <span className="text-2xl">{icon}</span>
+              <h3 className="text-xl font-bold">{header}</h3>
+            </div>
+            <div className="ml-11">
+              {content && (
+                <div className="text-slate-700 dark:text-gray-300 leading-relaxed space-y-3">
+                  {content.split('\n').map((line, lineIndex) => {
+                    const trimmedLine = line.trim();
+                    if (!trimmedLine) return null;
+                    
+                    // Handle bullet points
+                    if (trimmedLine.startsWith('- ')) {
+                      const skill = trimmedLine.substring(2).trim();
+                      
+                      // Check if this is a skills section (Matching or Missing keywords)
+                      if (header.includes('MATCHING') || header.includes('MISSING') || header.includes('KEYWORDS')) {
+                        return (
+                          <span 
+                            key={lineIndex} 
+                            className={`inline-block px-3 py-1 rounded-full text-sm font-medium mr-2 mb-2 ${
+                              header.includes('MATCHING') 
+                                ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 border border-green-200 dark:border-green-800'
+                                : 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 border border-red-200 dark:border-red-800'
+                            }`}
+                          >
+                            {skill}
+                          </span>
+                        );
+                      }
+                      
+                      // Regular bullet points for other sections
+                      return (
+                        <div key={lineIndex} className="flex items-start gap-3">
+                          <span className="text-emerald-500 dark:text-emerald-400 mt-1">•</span>
+                          <span className="flex-1">{skill}</span>
+                        </div>
+                      );
+                    }
+                    
+                    // Handle numbered lists
+                    if (/^\d+\./.test(trimmedLine)) {
+                      const parts = trimmedLine.split('. ');
+                      if (parts.length > 1) {
+                        return (
+                          <div key={lineIndex} className="flex items-start gap-3">
+                            <span className="text-emerald-500 dark:text-emerald-400 font-semibold min-w-[20px]">
+                              {parts[0]}.
+                            </span>
+                            <span className="flex-1">{parts.slice(1).join('. ')}</span>
+                          </div>
+                        );
+                      }
+                    }
+                    
+                    // Handle bold text
+                    if (trimmedLine.includes('**')) {
+                      const formattedLine = trimmedLine
+                        .replace(/\*\*(.*?)\*\*/g, '<strong class="font-semibold text-slate-900 dark:text-white">$1</strong>');
+                      return (
+                        <div 
+                          key={lineIndex} 
+                          className="text-slate-700 dark:text-gray-300"
+                          dangerouslySetInnerHTML={{ __html: formattedLine }}
+                        />
+                      );
+                    }
+                    
+                    // Regular text
+                    return (
+                      <div key={lineIndex} className="text-slate-700 dark:text-gray-300">
+                        {trimmedLine}
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          </div>
+        );
+      }
+      
+      // Handle non-header content
+      return (
+        <div key={index} className="text-slate-700 dark:text-gray-300 leading-relaxed mb-4">
+          {section.trim()}
+        </div>
+      );
+    });
+  };
+
   return (
     <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-2xl shadow-xl border border-slate-200 dark:border-gray-700 overflow-hidden h-fit">
       <div className="bg-gradient-to-r from-emerald-600 to-teal-600 px-6 py-4">
@@ -254,10 +386,8 @@ export const AnalysisResults: FC<AnalysisResultsProps> = ({ result, loading }) =
             ))}
           </div>
         ) : (
-          <div className="prose prose-slate dark:prose-invert max-w-none">
-            <div className="whitespace-pre-wrap text-slate-700 dark:text-gray-300 leading-relaxed text-sm">
-              {result}
-            </div>
+          <div className="max-w-none max-h-screen overflow-y-auto pr-2 custom-scrollbar">
+            {formatAnalysisResult(result)}
           </div>
         )}
       </div>

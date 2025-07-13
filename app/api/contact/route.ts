@@ -66,13 +66,13 @@ export async function POST(request: NextRequest) {
     });
     await newContact.save();
 
-    console.log('Contact form submission saved:', {
-      name,
-      email,
-      subject,
-      message,
-      timestamp: new Date().toISOString(),
-    });
+    // console.log('Contact form submission saved:', {
+    //   name,
+    //   email,
+    //   subject,
+    //   message,
+    //   timestamp: new Date().toISOString(),
+    // });
 
     return NextResponse.json(
       {

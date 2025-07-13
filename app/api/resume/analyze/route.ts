@@ -1,6 +1,8 @@
+
 import { NextRequest, NextResponse } from "next/server";
-import { groq } from "@ai-sdk/groq";
 import { generateText } from "ai";
+import { groq } from "@ai-sdk/groq";
+import { calculateATSScore, getScoreInterpretation } from "../service";
 
 interface GrokError extends Error {
   code?: string;
@@ -12,18 +14,17 @@ export async function POST(req: NextRequest) {
     const jobDescription = formData.get("jobDescription") as string | null;
     const resumeText = formData.get("resumeText") as string | null;
 
-    if (!jobDescription || !jobDescription.trim()) {
+    if (!jobDescription?.trim()) {
       return NextResponse.json(
         { error: "Job description is required" },
         { status: 400 }
       );
     }
 
-    if (!resumeText || resumeText.trim().length < 50) {
+    if (!resumeText?.trim() || resumeText.length < 50) {
       return NextResponse.json(
         {
-          error:
-            "Resume text is required and must contain sufficient content (at least 50 characters).",
+          error: "Resume text is required and must contain sufficient content (at least 50 characters).",
         },
         { status: 400 }
       );
@@ -37,51 +38,59 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    // Calculate ATS score
+    const atsScore = calculateATSScore(resumeText, jobDescription);
+    
+    // Generate analysis using Grok
     const result = await generateText({
       model: groq("llama-3.3-70b-versatile"),
       messages: [
         {
           role: "system",
-          content:
-            "You are a professional resume reviewer and ATS (Applicant Tracking System) expert. Analyze resumes thoroughly and provide actionable feedback.",
+          content: `You are a professional resume reviewer and ATS expert. Be critical and realistic in your assessment, focusing on keyword matches and relevant experience.
+
+SCORING GUIDELINES:
+- 90-100: Exceptional match
+- 80-89: Good match
+- 70-79: Fair match
+- 60-69: Poor match
+- Below 60: Very poor match
+
+The calculated ATS score is: ${atsScore}/100`,
         },
         {
           role: "user",
-          content: `Please analyze this resume against the job description and provide a comprehensive assessment:
+          content: `Analyze this resume against the job description using the ATS score of ${atsScore}/100.
 
 **RESUME CONTENT:**
-${resumeText.substring(0, 3000)} ${
-            resumeText.length > 3000 ? "...(truncated)" : ""
-          }
+${resumeText.substring(0, 3000)}${resumeText.length > 3000 ? "...(truncated)" : ""}
 
 **JOB DESCRIPTION:**
-${jobDescription.substring(0, 2000)} ${
-            jobDescription.length > 2000 ? "...(truncated)" : ""
-          }
+${jobDescription.substring(0, 2000)}${jobDescription.length > 2000 ? "...(truncated)" : ""}
 
-**Please provide analysis in the following format:**
-
+**Format:**
 ## 🎯 ATS COMPATIBILITY SCORE
-Score: [X/100]
+Score: ${atsScore}/100
+${getScoreInterpretation(atsScore)}
 
 ## ✅ MATCHING SKILLS & KEYWORDS
-- [List matching skills and keywords found in both resume and job description]
+[List matching skills and keywords]
 
 ## ❌ MISSING KEYWORDS
-- [List important keywords from job description that are missing from resume]
+[List missing keywords from job description]
+
+## 🔍 EXPERIENCE LEVEL ANALYSIS
+[Analyze experience level match]
 
 ## 💡 RECOMMENDATIONS
-1. [Specific actionable suggestions]
-2. [More suggestions]
+[Provide 3-5 specific suggestions]
 
 ## 📊 OVERALL ASSESSMENT
-[Brief summary of strengths and areas for improvement]
-
-Please be specific and actionable in your recommendations.`,
+[Explain the score]`,
         },
       ],
-      maxTokens: 1000,
-      temperature: 0.3,
+      maxTokens: 1200,
+      temperature: 0.1,
     });
 
     if (!result.text) {
@@ -94,16 +103,14 @@ Please be specific and actionable in your recommendations.`,
     return NextResponse.json({
       result: result.text,
       success: true,
+      calculatedScore: atsScore,
     });
   } catch (error: unknown) {
     const err = error as GrokError;
 
     if (err.message.includes("429")) {
       return NextResponse.json(
-        {
-          error:
-            "API quota exceeded. Please try again later or check your Groq plan.",
-        },
+        { error: "API quota exceeded. Please try again later." },
         { status: 429 }
       );
     }
@@ -118,8 +125,7 @@ Please be specific and actionable in your recommendations.`,
     return NextResponse.json(
       {
         error: "Internal server error. Please try again.",
-        details:
-          process.env.NODE_ENV === "development" ? err.message : undefined,
+        details: process.env.NODE_ENV === "development" ? err.message : undefined,
       },
       { status: 500 }
     );

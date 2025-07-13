@@ -26,7 +26,6 @@ const Navbar = () => {
 
   const handleThemeChange = (newTheme: string) => {
     setTheme(newTheme);
-    console.log("Theme changed to:", newTheme);
   };
 
   const getThemeIcon = () => {

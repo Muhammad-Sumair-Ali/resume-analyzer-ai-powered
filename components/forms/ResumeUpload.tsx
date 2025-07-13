@@ -5,7 +5,7 @@ import type React from "react"
 import { motion } from "motion/react";
 
 import { AnalysisResults, FileUpload, JobDescriptionInput, usePDFExtraction, useResumeAnalysis } from "@/hooks/useResumeForm"
-import { AlertCircle, FileText, Loader2, Send } from "lucide-react";
+import { AlertCircle, FileText, Loader2, Send, CheckCircle } from "lucide-react";
 
 export default function ResumeUploadForm() {
   const { extractTextFromPDF, isReady } = usePDFExtraction();
@@ -22,6 +22,8 @@ export default function ResumeUploadForm() {
     setError,
     lastSubmission,
     setLastSubmission,
+    analyzedResume,
+    setAnalyzedResume,
     analyzeResume
   } = useResumeAnalysis();
 
@@ -30,6 +32,12 @@ export default function ResumeUploadForm() {
     setResume(file);
     setError('');
     
+    // Clear the analyzed resume state when a new file is selected
+    if (file && analyzedResume && file.name !== analyzedResume.name) {
+      setAnalyzedResume(null);
+      setResult('');
+    }
+    
     if (file) {
       if (file.type !== 'application/pdf') {
         setError('Please upload a PDF file.');
@@ -37,6 +45,24 @@ export default function ResumeUploadForm() {
         setError('File size must be less than 10MB.');
       }
     }
+  };
+
+  const handleJobDescriptionChange = (e: any) => {
+    const newJobDescription = e.target.value;
+    setJobDescription(newJobDescription);
+    
+    // Clear the analyzed state when job description changes significantly
+    // This allows users to re-analyze with a different job description
+    if (analyzedResume && newJobDescription.trim() !== jobDescription.trim()) {
+      setAnalyzedResume(null);
+      setResult('');
+    }
+  };
+
+  const handleResetAnalysis = () => {
+    setAnalyzedResume(null);
+    setResult('');
+    setError('');
   };
 
   const handleSubmit = async () => {
@@ -65,6 +91,8 @@ export default function ResumeUploadForm() {
       const resumeText = await extractTextFromPDF(resume);
       const analysisResult = await analyzeResume(resumeText, jobDescription);
       setResult(analysisResult);
+      // Mark this resume as analyzed
+      setAnalyzedResume(resume);
     } catch (err) {
       console.error('Error:', err);
       const message = err instanceof Error ? err.message : 'An error occurred.';
@@ -78,6 +106,16 @@ export default function ResumeUploadForm() {
     }
   };
 
+  // Check if the current resume has already been analyzed
+  const isResumeAnalyzed = analyzedResume && resume && analyzedResume.name === resume.name;
+  
+  // Check if button should be disabled
+  const isButtonDisabled = loading || 
+    !isReady || 
+    Date.now() - lastSubmission < 20000 || 
+    isResumeAnalyzed ||
+    !resume || 
+    !jobDescription.trim();
 
 
   return (
@@ -109,7 +147,7 @@ export default function ResumeUploadForm() {
                   
                   <JobDescriptionInput
                     value={jobDescription}
-                    onChange={(e: any) => setJobDescription(e.target.value)}
+                    onChange={handleJobDescriptionChange}
                   />
                   
                   {error && (
@@ -128,13 +166,22 @@ export default function ResumeUploadForm() {
                   
                   <button
                     onClick={handleSubmit}
-                    disabled={loading || !isReady || Date.now() - lastSubmission < 20000}
-                    className="w-full bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-semibold py-4 px-6 rounded-xl disabled:from-gray-400 disabled:to-gray-500 disabled:cursor-not-allowed transition-all duration-300 flex items-center justify-center gap-3 shadow-lg hover:shadow-xl disabled:shadow-none"
+                    disabled={isButtonDisabled}
+                    className={`w-full font-semibold py-4 px-6 rounded-xl transition-all duration-300 flex items-center justify-center gap-3 shadow-lg hover:shadow-xl disabled:shadow-none ${
+                      isResumeAnalyzed
+                        ? 'bg-gray-400 text-gray-600 cursor-not-allowed'
+                        : 'bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white disabled:from-gray-400 disabled:to-gray-500 disabled:cursor-not-allowed'
+                    }`}
                   >
                     {loading ? (
                       <>
                         <Loader2 className="w-5 h-5 animate-spin" />
                         Analyzing...
+                      </>
+                    ) : isResumeAnalyzed ? (
+                      <>
+                        <CheckCircle className="w-5 h-5" />
+                        Resume Already Analyzed
                       </>
                     ) : (
                       <>
@@ -143,6 +190,28 @@ export default function ResumeUploadForm() {
                       </>
                     )}
                   </button>
+                  
+                  {isResumeAnalyzed && (
+                    <motion.div
+                      initial={{ opacity: 0, scale: 0.95 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      className="flex items-start gap-3 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl"
+                    >
+                      <CheckCircle className="w-5 h-5 text-blue-500 mt-0.5 flex-shrink-0" />
+                      <div className="flex-1">
+                        <p className="font-medium text-blue-800 dark:text-blue-200">Resume Analyzed</p>
+                        <p className="text-sm text-blue-700 dark:text-blue-300 mb-3">
+                          This resume has already been analyzed. Upload a different resume or modify the job description to analyze again.
+                        </p>
+                        <button
+                          onClick={handleResetAnalysis}
+                          className="text-sm text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-200 underline"
+                        >
+                          Reset Analysis
+                        </button>
+                      </div>
+                    </motion.div>
+                  )}
                 </div>
               </div>
             </div>
