@@ -118,6 +118,20 @@ export default function ResumeUploadForm() {
     !jobDescription.trim();
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
   return (
     <div className="min-h-screen pt-12">
    
