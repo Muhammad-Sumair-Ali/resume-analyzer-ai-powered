@@ -16,8 +16,20 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Resume Analyzer",
-  description: "Make Resume better hunt job",
+  title: "AI-Powered Resume Analyzer | Optimize Your CV for Job Success",
+  description: "Unlock your career potential with our AI-powered resume analyzer. Get instant, actionable feedback to optimize your CV, stand out to employers, and land your dream job.",
+  keywords: [
+    "resume analyzer",
+    "AI resume analysis",
+    "job application tips",
+    "resume optimization",
+    "CV improvement",
+    "job hunting",
+    "AI powered resume",
+    "resume feedback",
+    "career advice",
+    "resume builder"
+  ],
 };
 
 export default function RootLayout({

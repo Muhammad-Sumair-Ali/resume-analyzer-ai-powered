@@ -1,36 +1,93 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# AI-Powered Resume Analyzer
 
-## Getting Started
+Unlock your career potential with an advanced AI-powered resume analyzer. Instantly upload your resume and job description to receive actionable feedback, ATS compatibility scoring, and personalized recommendations to help you stand out and land your dream job.
 
-First, run the development server:
+---
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+## 🚀 Features
+- **AI Resume Analysis:** Upload your resume and a job description to get a detailed, AI-generated analysis.
+- **ATS Compatibility Score:** See how well your resume matches the job using an Applicant Tracking System (ATS) score (0-100).
+- **Keyword & Skills Matching:** Identify matching and missing keywords between your resume and the job description.
+- **Personalized Recommendations:** Receive specific suggestions to improve your resume for each job.
+- **Modern UI/UX:** Responsive, accessible, and visually appealing interface.
+- **Contact & About Pages:** Learn about the developer and get in touch easily.
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+---
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## 🛠️ Tech Stack
+- **Frontend:** Next.js 15, React 19, TypeScript, Tailwind CSS, Shadcn UI, Framer Motion
+- **AI & Analysis:** OpenAI API, Groq API, pdf-parse, Tesseract.js
+- **Backend:** Next.js API routes, MongoDB (for contact form)
+- **Other:** Radix UI, Lucide Icons, Axios, ESLint, Prettier
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+---
 
-## Learn More
+## 📦 Installation & Setup
+1. **Clone the repository:**
+   ```bash
+   git clone https://github.com/your-username/resume-analyzer-ai-powered.git
+   cd resume-analyzer-ai-powered
+   ```
+2. **Install dependencies:**
+   ```bash
+   npm install
+   # or
+   yarn install
+   ```
+3. **Set up environment variables:**
+   - Create a `.env.local` file in the root directory.
+   - Add your API keys (OpenAI, Groq, MongoDB, etc.) as needed.
+4. **Run the development server:**
+   ```bash
+   npm run dev
+   ```
+   Open [http://localhost:3000](http://localhost:3000) to view the app.
 
-To learn more about Next.js, take a look at the following resources:
+---
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## 📝 Usage Guide
+- **Landing Page:** Overview of features and quick access to resume analysis.
+- **Upload Page (`/upload`):** Upload your resume (PDF) and paste a job description. Get instant analysis and recommendations.
+- **About Page (`/about`):** Learn about the developer, tech stack, and project vision.
+- **Contact Page (`/contact`):** Send a message directly to the developer.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+---
 
-## Deploy on Vercel
+## 🧩 Main Components & Structure
+- `app/` — Next.js app directory (pages, layout, API routes)
+- `components/` — UI components (Navbar, Footer, forms, sections, etc.)
+- `hooks/` — Custom React hooks (resume form logic, PDF extraction)
+- `lib/` — Utility functions (resume parsing, helpers)
+- `app/api/` — API endpoints:
+  - `/resume/analyze` — POST: Analyze resume vs. job description (AI-powered)
+  - `/contact` — POST: Send contact form message (saved to MongoDB)
+- `app/model/` — Mongoose models (Contact)
+- `app/config/` — Database connection config
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+---
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## 📡 API Overview
+- **POST `/api/resume/analyze`**
+  - **Body:** `resumeText`, `jobDescription`
+  - **Returns:** ATS score, matching/missing keywords, recommendations, overall assessment
+- **POST `/api/contact`**
+  - **Body:** `name`, `email`, `subject`, `message`
+  - **Returns:** Success or error message
+
+---
+
+## 👤 About the Developer
+- **Name:** Muhammad Sumair
+- **Location:** Karachi, Pakistan
+- **Skills:** Full Stack Development, AI/ML Integration, UI/UX Design
+- **Contact:** muhammadsumair224@gmail.com
+- **GitHub:** [Muhammad-Sumair-Ali](https://github.com/Muhammad-Sumair-Ali)
+- **LinkedIn:** [muhammad-sumair-b60a91301](https://www.linkedin.com/in/muhammad-sumair-b60a91301)
+
+---
+
+## 🤝 Contributing
+Pull requests are welcome! For major changes, please open an issue first to discuss what you would like to change.
+
+## 📄 License
+This project is open source and available under the [MIT License](LICENSE).

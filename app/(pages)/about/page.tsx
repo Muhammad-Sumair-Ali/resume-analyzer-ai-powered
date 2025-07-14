@@ -29,8 +29,11 @@ const AboutPage = () => {
     { name: "Framer Motion", category: "Animation", icon: "✨" },
     { name: "OpenAI API", category: "AI", icon: "🤖" },
     { name: "Groq API", category: "AI", icon: "🚀" },
-    { name: "PDF.js", category: "Document", icon: "📄" },
+    { name: "pdf-parse", category: "Document", icon: "📄" },
     { name: "Tesseract.js", category: "OCR", icon: "👁️" },
+    { name: "axios", category: "Networking", icon: "🌐" },
+    { name: "mongoose", category: "Database ODM", icon: "🍃" },
+    { name: "lucide-react", category: "Icons", icon: "🔗" },
   ];
 
   const skills = [
@@ -75,7 +78,7 @@ const AboutPage = () => {
 
   const aiTechnologies = [
     {
-      name: "OpenAI GPT-4",
+      name: "OpenAI API",
       description:
         "Advanced language model for intelligent text analysis and content optimization",
       use: "Resume content analysis and improvement suggestions",
@@ -86,9 +89,14 @@ const AboutPage = () => {
       use: "Rapid job description matching and keyword extraction",
     },
     {
-      name: "PDF.js",
-      description: "Mozilla's PDF parsing library for document processing",
-      use: "Resume file extraction and text parsing",
+      name: "pdf-parse",
+      description: "Node.js module for extracting text from PDF files on the server side.",
+      use: "Server-side PDF text extraction for resume analysis.",
+    },
+    {
+      name: "pdfjs-dist",
+      description: "PDF.js distribution for client-side PDF parsing and text extraction.",
+      use: "Client-side PDF file extraction and text parsing in the browser.",
     },
     {
       name: "Tesseract.js",
