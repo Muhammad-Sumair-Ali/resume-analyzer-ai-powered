@@ -1,5 +1,3 @@
-// ATS (Applicant Tracking System) Service for Resume Analysis
-// Provides scoring and analysis functions for resume-job matching
 
 interface IndustryKeywords {
   [key: string]: string[];
@@ -9,12 +7,7 @@ interface IndustryIndicators {
   [key: string]: string[];
 }
 
-/**
- * Calculate ATS compatibility score between resume and job description
- * @param resumeText - The resume content
- * @param jobDescription - The job description
- * @returns ATS score from 0-100
- */
+
 export function calculateATSScore(resumeText: string, jobDescription: string): number {
   const resume = resumeText.toLowerCase();
   const job = jobDescription.toLowerCase();
@@ -78,13 +71,13 @@ function calculateOverqualificationPenalty(resume: string, job: string): number 
     
     let penalty = 0;
     
-    if (resumeSeniority === 3 && jobSeniority <= 1) penalty += 15; // Reduced from 30
-    if (resumeSeniority === 2 && jobSeniority === 0) penalty += 10; // Reduced from 20
-    if (resumeYears >= 5 && (job.includes('intern') || job.includes('junior'))) penalty += 10; // Reduced from 25
-    if (resumeYears >= 3 && job.includes('intern')) penalty += 8; // Reduced from 20
-    if (resume.includes('senior') && (job.includes('junior') || job.includes('intern'))) penalty += 7; // Reduced from 15
+    if (resumeSeniority === 3 && jobSeniority <= 1) penalty += 15; 
+    if (resumeSeniority === 2 && jobSeniority === 0) penalty += 10; 
+    if (resumeYears >= 5 && (job.includes('intern') || job.includes('junior'))) penalty += 10; 
+    if (resumeYears >= 3 && job.includes('intern')) penalty += 8; 
+    if (resume.includes('senior') && (job.includes('junior') || job.includes('intern'))) penalty += 7; 
     
-    return Math.min(20, penalty); // Cap total penalty at 20 points
+    return Math.min(20, penalty);
   }
 
 /**
@@ -107,7 +100,6 @@ function extractYearsOfExperience(resume: string): number {
     }
   }
   
-  // Default to 0 if no years found
   return 0;
 }
 
@@ -117,14 +109,11 @@ function extractYearsOfExperience(resume: string): number {
 function extractKeywords(text: string): string[] {
   const lowerText = text.toLowerCase();
   
-  // First, detect industry/domain from job description
   const detectedIndustry = detectIndustry(lowerText);
   
-  // Get relevant keywords based on industry + extract from text
   const relevantKeywords = getIndustryKeywords(detectedIndustry);
   const extractedKeywords = extractFromText(lowerText);
   
-  // Combine and deduplicate
   const allKeywords = [...new Set([...relevantKeywords, ...extractedKeywords])];
   
   return allKeywords.filter(keyword => lowerText.includes(keyword));
@@ -239,42 +228,32 @@ function calculateExperienceScore(resume: string, job: string): number {
     
     if (jobSeniority === resumeSeniority) return 25;
     if (Math.abs(jobSeniority - resumeSeniority) === 1) return 15;
-    if (hasRelevantSkills && resumeSeniority > jobSeniority) return 15; // Reward relevant skills
+    if (hasRelevantSkills && resumeSeniority > jobSeniority) return 15;
     return hasExperience ? 10 : 5;
   }
-/**
- * Detect seniority level from text
- * @returns 0=intern, 1=junior, 2=mid, 3=senior
- */
+
 function detectSeniorityLevel(text: string): number {
   if (text.includes('senior') || text.includes('lead') || text.includes('architect')) return 3;
   if (text.includes('mid') || text.includes('intermediate') || text.includes('2-5 years')) return 2;
   if (text.includes('junior') || text.includes('entry') || text.includes('0-2 years')) return 1;
-  return 2; // default to mid-level
+  return 2; 
 }
 
-/**
- * Calculate structure and format score
- */
+
 function calculateStructureScore(resume: string): number {
   let score = 0;
   
-  // Check for standard resume sections
   const sections = ['experience', 'education', 'skills', 'projects'];
   sections.forEach(section => {
     if (resume.includes(section)) score += 2.5;
   });
   
-  // Check for contact information
   if (resume.includes('@') || resume.includes('email')) score += 2.5;
   if (resume.includes('phone') || /\d{3}-\d{3}-\d{4}/.test(resume)) score += 2.5;
   
   return Math.min(15, score);
 }
 
-/**
- * Get human-readable interpretation of the ATS score
- */
 export function getScoreInterpretation(score: number): string {
   if (score >= 90) {
     return "🎯 **Exceptional Match** - Your resume is highly optimized for this position. Strong keyword alignment and relevant experience.";
@@ -289,9 +268,6 @@ export function getScoreInterpretation(score: number): string {
   }
 }
 
-/**
- * Get detailed analysis breakdown
- */
 export function getDetailedAnalysis(resumeText: string, jobDescription: string): {
   score: number;
   keywordMatch: number;

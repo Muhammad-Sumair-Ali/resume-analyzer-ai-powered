@@ -71,13 +71,11 @@ export const usePDFExtraction = () => {
   return { extractTextFromPDF, isReady: !!pdfjsLib };
 };
 
-// Interface for API response
 interface AnalysisResponse {
   result?: string;
   error?: string;
 }
 
-// Custom hook for resume analysis state
 export const useResumeAnalysis = () => {
   const [resume, setResume] = useState<File | null>(null);
   const [jobDescription, setJobDescription] = useState<string>('');
@@ -186,13 +184,11 @@ export const FileUpload: FC<FileUploadProps> = ({ resume, onFileChange, error })
   </div>
 );
 
-// Props for JobDescriptionInput component
 interface JobDescriptionInputProps {
   value: string;
   onChange: (event: ChangeEvent<HTMLTextAreaElement>) => void;
 }
 
-// Job Description Component
 export const JobDescriptionInput: FC<JobDescriptionInputProps> = ({ value, onChange }) => (
   <div className="space-y-4">
     <div className="flex items-center gap-3 mb-4">
@@ -216,7 +212,6 @@ export const JobDescriptionInput: FC<JobDescriptionInputProps> = ({ value, onCha
   </div>
 );
 
-// Props for AnalysisResults component
 interface AnalysisResultsProps {
   result: string;
   loading: boolean;
@@ -226,22 +221,17 @@ interface AnalysisResultsProps {
 export const AnalysisResults: FC<AnalysisResultsProps> = ({ result, loading }) => {
   if (!result && !loading) return null;
 
-  // Function to format the analysis result
   const formatAnalysisResult = (text: string) => {
-    // Split the text into sections
     const sections = text.split(/(?=## )/);
     
     return sections.map((section, index) => {
       if (section.trim() === '') return null;
       
-      // Check if it's a header section
       if (section.startsWith('## ')) {
         const lines = section.split('\n');
-        // Remove any leading emoji/icon and extra spaces from the header
         const header = lines[0].replace('## ', '').replace(/^[^a-zA-Z0-9]+/, '').trim();
         const content = lines.slice(1).join('\n').trim();
         
-        // Determine the icon and color based on the header
         let icon = '📊';
         let color = 'text-blue-600 dark:text-blue-400';
         
@@ -275,11 +265,9 @@ export const AnalysisResults: FC<AnalysisResultsProps> = ({ result, loading }) =
                     const trimmedLine = line.trim();
                     if (!trimmedLine) return null;
                     
-                    // Handle bullet points
                     if (trimmedLine.startsWith('- ')) {
                       const skill = trimmedLine.substring(2).trim();
                       
-                      // Check if this is a skills section (Matching or Missing keywords)
                       if (header.includes('MATCHING') || header.includes('MISSING') || header.includes('KEYWORDS')) {
                         return (
                           <span 
@@ -319,7 +307,6 @@ export const AnalysisResults: FC<AnalysisResultsProps> = ({ result, loading }) =
                       }
                     }
                     
-                    // Handle bold text
                     if (trimmedLine.includes('**')) {
                       const formattedLine = trimmedLine
                         .replace(/\*\*(.*?)\*\*/g, '<strong class="font-semibold text-slate-900 dark:text-white">$1</strong>');
@@ -332,7 +319,6 @@ export const AnalysisResults: FC<AnalysisResultsProps> = ({ result, loading }) =
                       );
                     }
                     
-                    // Regular text
                     return (
                       <div key={lineIndex} className="text-slate-700 dark:text-gray-300">
                         {trimmedLine}
@@ -346,7 +332,6 @@ export const AnalysisResults: FC<AnalysisResultsProps> = ({ result, loading }) =
         );
       }
       
-      // Handle non-header content
       return (
         <div key={index} className="text-slate-700 dark:text-gray-300 leading-relaxed mb-4">
           {section.trim()}
@@ -395,7 +380,6 @@ export const AnalysisResults: FC<AnalysisResultsProps> = ({ result, loading }) =
   );
 };
 
-// Props for StatsCard component
 interface StatsCardProps {
   icon: LucideIcon;
   title: string;

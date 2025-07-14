@@ -11,16 +11,13 @@ interface ContactFormData {
 }
 
 
-// Handle POST request
 export async function POST(request: NextRequest) {
   try {
-    // Connect to the database
     await connectDb();
 
     const body: ContactFormData = await request.json();
     const { name, email, subject, message } = body;
 
-    // Validate required fields
     if (!name || !email || !subject || !message) {
       return NextResponse.json(
         { error: 'All fields are required' },
@@ -28,7 +25,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Validate email format
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
       return NextResponse.json(
@@ -37,7 +33,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Validate field lengths
     if (name.length < 2) {
       return NextResponse.json(
         { error: 'Name must be at least 2 characters long' },
@@ -57,7 +52,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Save to MongoDB
     const newContact = new Contact({
       name,
       email,
@@ -90,7 +84,6 @@ export async function POST(request: NextRequest) {
   }
 }
 
-// Handle GET request
 export async function GET() {
   await connectDb();
   try {
@@ -105,21 +98,3 @@ export async function GET() {
   }
 }
 
-// import nodemailer from 'nodemailer';
-
-// const transporter = nodemailer.createTransport({
-//   service: 'gmail',
-//   auth: {
-//     user: process.env.EMAIL_USER,
-//     pass: process.env.EMAIL_PASS,
-//   },
-// });
-
-// await transporter.sendMail({
-//   from: email,
-//   to: 'muhammadsumair224@gmail.com',
-//   subject: `New Contact Form Submission: ${subject}`,
-//   text: `Name: ${name}\nEmail: ${email}\nSubject: ${subject}\nMessage: ${message}`,
-// });
-
-// Add this before the success response in the try block.

@@ -1,4 +1,4 @@
-// Export all ATS service functions
+
 export {
   calculateATSScore,
   getScoreInterpretation,
